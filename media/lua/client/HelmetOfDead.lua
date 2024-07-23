@@ -1,29 +1,48 @@
-local timer = nil
+print("CheckClothing.lua loaded")
 
-function HelmetOfDead_OnEquip(player, item)
-    if item:getType() == "HelmetOfDead" then
-        timer = ZombRand(60, 120) -- Tiempo customizable en segundos
-        player:Say("El casco empieza a pitar...")
-        Events.OnTick.Add(HelmetOfDead_OnTick)
-    end
-end
+-- Contador de ticks
+local tickCounter = 0
 
-function HelmetOfDead_OnTick()
-    if timer and timer > 0 then
-        timer = timer - 1
-        if timer == 0 then
-            getPlayer():Say("El casco explota!")
-            getPlayer():getBodyDamage():setHealth(0) -- Mata al jugador
-            Events.OnTick.Remove(HelmetOfDead_OnTick)
+-- Función para detectar la ropa del personaje
+function CheckPlayerClothing()
+    -- Incrementar el contador de ticks
+    tickCounter = tickCounter + 1
+    
+    -- Solo ejecutar cada 1000 ticks
+    if tickCounter >= 1000 then
+        -- Resetear el contador
+        tickCounter = 0
+        
+        -- Obtener el jugador
+        local player = getPlayer()
+        if player then
+            print("Player detected: ", tostring(player))
+            
+            -- Obtener la ropa del jugador
+            local clothing = player:getWornItems()
+            if clothing then
+                print("Clothing items detected")
+                -- Iterar sobre las prendas y mostrar en consola
+                for i = 0, clothing:size() - 1 do
+                    local item = clothing:getItemByIndex(i)
+                    if item then
+                        print("Clothing item: ", item:getDisplayName(), ", Type: ", item:getType())
+                        -- Comprobar si el casco HelmetAsDead está equipado
+                        if item:getType() == "HelmetAsDead" then
+                            print("HelmetAsDead equipped: ", item:getType())
+                            player:Say("El casco HelmetAsDead está equipado.")
+                        end
+                    end
+                end
+            else
+                print("No clothing items found.")
+            end
+        else
+            print("No se pudo obtener el jugador.")
         end
     end
 end
 
-function HelmetOfDead_OnUnequip(player, item)
-    if item:getType() == "HelmetOfDead" then
-        Events.OnTick.Remove(HelmetOfDead_OnTick)
-    end
-end
-
-Events.OnEquipPrimary.Add(HelmetOfDead_OnEquip)
-Events.OnUnequipPrimary.Add(HelmetOfDead_OnUnequip)
+-- Añadir la función al evento OnTick
+Events.OnTick.Add(CheckPlayerClothing)
+print("Added CheckPlayerClothing to Events.OnTick")
