@@ -1,46 +1,59 @@
 print("CheckClothing.lua loaded")
 
--- Contador de ticks
-local tickCounter = 0
+-- Variable para mantener el estado del casco
+local helmetActive = false
 
--- Función para detectar la ropa del personaje
-function CheckPlayerClothing()
-    -- Incrementar el contador de ticks
-    tickCounter = tickCounter + 1
-    
-    -- Solo ejecutar cada 1000 ticks
-        -- Resetear el contador
-        tickCounter = 0
-        
-        -- Obtener el jugador
-        local player = getPlayer()
-        if player then
-          --  print("Player detected: ", tostring(player))
-            
-            -- Obtener la ropa del jugador
-            local clothing = player:getWornItems()
-            if clothing then
-               -- print("Clothing items detected")
-                -- Iterar sobre las prendas y mostrar en consola
-                for i = 0, clothing:size() - 1 do
-                    local item = clothing:getItemByIndex(i)
-                    if item then
-                      --  print("Clothing item: ", item:getDisplayName(), ", Type: ", item:getType())
-                        -- Comprobar si el casco HelmetAsDead está equipado
-                        if item:getType() == "HelmetAsDead" then
-                            print("HelmetAsDead equipped: ", item:getType())
-                            player:Say("Quitenme esta locura!.")
-                        end
-                    end
-                end
-            else
-                print("No clothing items found.")
-            end
+-- Función para manejar el menú contextual del casco
+function HelmetOfDead_ContextMenu(playerIndex, context, worldobjects)
+    local player = getSpecificPlayer(playerIndex)
+    local helmet = player and player:getWornItem("Hat")
+
+    if helmet and helmet:getType() == "HelmetAsDead" then
+        if helmetActive then
+            context:addOption("Desactivar", worldobjects, HelmetOfDead_Deactivate, playerIndex)
         else
-            print("No se pudo obtener el jugador.")
+            context:addOption("Activar", worldobjects, HelmetOfDead_Activate, playerIndex)
         end
+    end
 end
 
--- Añadir la función al evento OnTick
-Events.OnTick.Add(CheckPlayerClothing)
-print("Added CheckPlayerClothing to Events.OnTick")
+-- Función para activar el casco
+function HelmetOfDead_Activate(worldobjects, playerIndex)
+    local player = getSpecificPlayer(playerIndex)
+    helmetActive = true
+    print("HelmetOfDead activado")
+    player:Say("Casco activado")
+end
+
+-- Función para desactivar el casco
+function HelmetOfDead_Deactivate(worldobjects, playerIndex)
+    local player = getSpecificPlayer(playerIndex)
+    helmetActive = false
+    print("HelmetOfDead desactivado")
+    player:Say("Casco desactivado")
+end
+
+-- Función para detectar la ropa del personaje
+function CheckPlayerClothing(playerIndex)
+    local player = getSpecificPlayer(playerIndex)
+    if player then
+        local helmet = player:getWornItem("Hat")
+        if helmet and helmet:getType() == "HelmetAsDead" then
+            print("HelmetAsDead equipped: ", helmet:getType())
+            player:Say("Quitenme esta locura!.")
+            Events.OnTick.Remove(CheckPlayerClothing)
+        end
+    end
+end
+
+-- Añadir la función al evento OnTick para cada jugador
+for i = 0, getNumActivePlayers() - 1 do
+    Events.OnTick.Add(function() CheckPlayerClothing(i) end)
+end
+
+-- Añadir la función al evento OnFillInventoryObjectContextMenu para cada jugador
+for i = 0, getNumActivePlayers() - 1 do
+    Events.OnFillInventoryObjectContextMenu.Add(function(player, context, worldobjects) HelmetOfDead_ContextMenu(i, context, worldobjects) end)
+end
+
+print("Added CheckPlayerClothing and HelmetOfDead_ContextMenu to Events")
