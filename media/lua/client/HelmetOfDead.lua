@@ -21,13 +21,9 @@ function HelmetOfDead_ContextMenu(player, context, worldobjects)
                         context:addOption("Desactivar", worldobjects, HelmetOfDead_Deactivate, player, helmet)
                     else
                         local deactivateOption = context:addOption("Desactivar", worldobjects, function() end)
+                        local removeOption = context:addOption("Dejar de usar", worldobjects, function() end)
                         deactivateOption.notAvailable = true
-
-                        -- Deshabilitar la opción nativa "Dejar de usar"
-                        local dropOption = context:getOptionFromName("Dejar de usar")
-                        if dropOption then
-                            dropOption.notAvailable = true
-                        end
+                        removeOption.notAvailable = true
                     end
                 else
                     context:addOption("Activar", worldobjects, HelmetOfDead_Activate, player, helmet)
@@ -61,9 +57,9 @@ end
 
 -- Función para remover el casco
 function HelmetOfDead_Remove(worldobjects, player, helmet)
+    player:removeWornItem(helmet)
     helmetActive = false
     timer = nil
-    player:removeWornItem(helmet)
     print("HelmetOfDead removido")
     player:Say("Casco removido")
     Events.OnTick.Remove(HelmetOfDead_Countdown)
@@ -129,3 +125,6 @@ print("Added CheckPlayerClothing to Events.OnTick")
 -- Añadir la función al evento OnFillInventoryObjectContextMenu
 Events.OnFillInventoryObjectContextMenu.Add(HelmetOfDead_ContextMenu)
 print("Added HelmetOfDead_ContextMenu to OnFillInventoryObjectContextMenu")
+
+
+
