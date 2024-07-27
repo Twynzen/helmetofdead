@@ -1,4 +1,4 @@
-module base
+module HelmetAsDead
 {
     item HelmetAsDead
     {
