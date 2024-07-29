@@ -15,5 +15,6 @@ module HelmetAsDead
         Insulation = 0.25,
         WaterResistance = 1,
         WorldStaticModel = HelmetOfDead,
+        Tags = HelmetOfDeadTag,
     }
 }

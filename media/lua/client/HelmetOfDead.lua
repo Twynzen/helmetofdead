@@ -1,41 +1,66 @@
 print("CheckClothing.lua loaded")
 
--- Variable para mantener el estado del casco
+-- Variables para el estado del casco y el objeto especial
 local helmetActive = false
-
--- Variable para el objeto especial (Key Helmet)
 local hasKeyHelmet = false
+local helmetItem = "HelmetAsDead"
+local keyItem = "HelmetExplosiveKey"
+
 
 -- Función para manejar el menú contextual del casco
-function HelmetOfDead_ContextMenu(player, context, worldobjects)
+function HelmetOfDead_ContextMenu(player, context, items)
+    print("Entrando en HelmetOfDead_ContextMenu")
     local player = getSpecificPlayer(0) -- Obtener el jugador
     if player then
-        local helmet = player:getWornItem("Hat")
-        print("Helmet object: ", helmet)
+        -- Iterar sobre los ítems seleccionados
+        for _, v in ipairs(items) do
+            local item = v
+            if not instanceof(item, "InventoryItem") then
+                item = item.items[1]
+            end
 
-        if helmet then
-            print("Helmet type: ", helmet:getType())
-            if helmet:getType() == "HelmetAsDead" then
+            print("Revisando item:", item:getType())
+
+            -- Verificar si el ítem es una instancia de InventoryItem y es HelmetAsDead
+            if instanceof(item, "InventoryItem") and item:getType() == "HelmetAsDead" and item:hasTag("HelmetOfDeadTag") then
+                print("El ítem es HelmetAsDead y tiene el tag HelmetOfDeadTag")
+
+                -- Solo añadir opciones al casco específico
                 if helmetActive then
                     if hasKeyHelmet then
-                        context:addOption("Desactivar", worldobjects, HelmetOfDead_Deactivate, player, helmet)
+                        context:addOption("Desactivar Casco Explosivo", item, HelmetOfDead_Deactivate, player, item)
                     else
-                        local deactivateOption = context:addOption("Desactivar", worldobjects, function() end)
-                        local removeOption = context:addOption("Dejar de usar", worldobjects, function() end)
+                        local deactivateOption = context:addOption("Desactivar Casco Explosivo", item, function() end)
                         deactivateOption.notAvailable = true
-                        removeOption.notAvailable = true
                     end
                 else
-                    context:addOption("Activar", worldobjects, HelmetOfDead_Activate, player, helmet)
+                    context:addOption("Activar Casco Explosivo", item, HelmetOfDead_Activate, player, item)
                 end
+            else
+                print("El ítem no es HelmetAsDead o no tiene el tag HelmetOfDeadTag")
             end
-        else
-            print("No helmet found.")
         end
     else
         print("No se pudo obtener el jugador.")
     end
 end
+
+
+--lOGICA PARA ITERAR INVENTARIO
+-- local inventory = player:getInventory()
+--         for i = 0, inventory:getItems():size() - 1 do
+--             local item = inventory:getItems():get(i)
+--             print("Revisando item en inventario:", item:getType())
+--             if instanceof(item, "InventoryItem") then
+--                 print("El item ", item,"es una instancia de InventoryItem")
+            
+--             else
+--                 print("El item no es una instancia de InventoryItem")
+--             end
+--         end
+
+
+
 
 -- Función para activar el casco
 function HelmetOfDead_Activate(worldobjects, player, helmet)
@@ -55,17 +80,7 @@ function HelmetOfDead_Deactivate(worldobjects, player, helmet)
     Events.OnTick.Remove(HelmetOfDead_Countdown)
 end
 
--- Función para remover el casco
-function HelmetOfDead_Remove(worldobjects, player, helmet)
-    player:removeWornItem(helmet)
-    helmetActive = false
-    timer = nil
-    print("HelmetOfDead removido")
-    player:Say("Casco removido")
-    Events.OnTick.Remove(HelmetOfDead_Countdown)
-end
-
--- Función para la cuenta regresiva
+-- Función para la cuenta regresida
 function HelmetOfDead_Countdown()
     if not helmetActive or not timer then return end
     timer = timer - 1
@@ -88,21 +103,6 @@ function HelmetOfDead_Countdown()
     end
 end
 
--- Función para detectar la ropa del personaje
-function CheckPlayerClothing()
-    local player = getPlayer()
-    if player then
-        local helmet = player:getWornItem("Hat")
-        if helmet then
-            if helmet:getType() == "HelmetAsDead" then
-                print("HelmetAsDead equipped: ", helmet:getType())
-                player:Say("Quitenme esta locura!.")
-                Events.OnTick.Remove(CheckPlayerClothing)
-            end
-        end
-    end
-end
-
 -- Función para verificar si el jugador tiene el Key Helmet
 function CheckKeyHelmet()
     local player = getPlayer()
@@ -118,13 +118,6 @@ end
 Events.OnTick.Add(CheckKeyHelmet)
 print("Added CheckKeyHelmet to Events.OnTick")
 
--- Añadir la función al evento OnTick para detectar la ropa del personaje
-Events.OnTick.Add(CheckPlayerClothing)
-print("Added CheckPlayerClothing to Events.OnTick")
-
 -- Añadir la función al evento OnFillInventoryObjectContextMenu
 Events.OnFillInventoryObjectContextMenu.Add(HelmetOfDead_ContextMenu)
 print("Added HelmetOfDead_ContextMenu to OnFillInventoryObjectContextMenu")
-
-
-
