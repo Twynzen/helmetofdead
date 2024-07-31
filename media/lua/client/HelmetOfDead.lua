@@ -6,40 +6,60 @@ local hasKeyHelmet = false
 local helmetItem = "HelmetAsDead"
 local keyItem = "HelmetExplosiveKey"
 
+function DisableDefaultOptions(context)
+    local optionsToRemove = {"Dejar de usar", "Soltar"}
+    for i = #context.options, 1, -1 do
+        local option = context.options[i]
+        for _, optToRemove in ipairs(optionsToRemove) do
+            if option.name == optToRemove then
+                table.remove(context.options, i)
+            elseif string.find(option.name, "Poner en contenedor") or string.find(option.name, "Colocar")then
+                table.remove(context.options, i)
+            end
+        end
+    end
+end
+
 
 -- Función para manejar el menú contextual del casco
 function HelmetOfDead_ContextMenu(player, context, items)
     print("Entrando en HelmetOfDead_ContextMenu")
     local player = getSpecificPlayer(0) -- Obtener el jugador
     if player then
+
+        local hat = player:getWornItem("Hat")
+        if hat and hat:getType() == "HelmetAsDead" and hat:hasTag("HelmetOfDeadTag") then
+            print("El jugador tiene puesto el casco HelmetAsDead con el tag HelmetOfDeadTag")
         -- Iterar sobre los ítems seleccionados
-        for _, v in ipairs(items) do
-            local item = v
-            if not instanceof(item, "InventoryItem") then
-                item = item.items[1]
-            end
+            for _, v in ipairs(items) do
+                local item = v
+                if not instanceof(item, "InventoryItem") then
+                    item = item.items[1]
+                end
 
-            print("Revisando item:", item:getType())
+                print("Revisando item:", item:getType())
 
-            -- Verificar si el ítem es una instancia de InventoryItem y es HelmetAsDead
-            if instanceof(item, "InventoryItem") and item:getType() == "HelmetAsDead" and item:hasTag("HelmetOfDeadTag") then
-                print("El ítem es HelmetAsDead y tiene el tag HelmetOfDeadTag")
+                -- Verificar si el ítem es una instancia de InventoryItem y es HelmetAsDead
+                if instanceof(item, "InventoryItem") and item:getType() == "HelmetAsDead" and item:hasTag("HelmetOfDeadTag") then
+                    print("El ítem es HelmetAsDead y tiene el tag HelmetOfDeadTag")
 
-                -- Solo añadir opciones al casco específico
-                if helmetActive then
-                    if hasKeyHelmet then
-                        context:addOption("Desactivar Casco Explosivo", item, HelmetOfDead_Deactivate, player, item)
+                    -- Solo añadir opciones al casco específico
+                    if helmetActive then
+                        if hasKeyHelmet then
+                            context:addOption("Desactivar Casco Explosivo", item, HelmetOfDead_Deactivate, player, item)
+                        else
+                            DisableDefaultOptions(context)
+                            local deactivateOption = context:addOption("Desactivar Casco Explosivo", item, function() end)
+                            deactivateOption.notAvailable = true
+                        end
                     else
-                        local deactivateOption = context:addOption("Desactivar Casco Explosivo", item, function() end)
-                        deactivateOption.notAvailable = true
+                        context:addOption("Activar Casco Explosivo", item, HelmetOfDead_Activate, player, item)
                     end
                 else
-                    context:addOption("Activar Casco Explosivo", item, HelmetOfDead_Activate, player, item)
+                    print("El ítem no es HelmetAsDead o no tiene el tag HelmetOfDeadTag")
                 end
-            else
-                print("El ítem no es HelmetAsDead o no tiene el tag HelmetOfDeadTag")
             end
-        end
+        end    
     else
         print("No se pudo obtener el jugador.")
     end
