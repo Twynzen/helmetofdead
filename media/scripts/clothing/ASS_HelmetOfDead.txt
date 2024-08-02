@@ -20,7 +20,7 @@ module HelmetAsDead
 
      item HelmetKey
     {
-        DisplayCategory = Key,
+        DisplayCategory = Security,
         Type = Key,
         DisplayName = Helmet Explosive Key,
         Icon = HelmetKey, 

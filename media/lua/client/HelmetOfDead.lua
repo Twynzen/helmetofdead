@@ -30,7 +30,7 @@ function HelmetOfDead_ContextMenu(player, context, items)
         local hat = player:getWornItem("Hat")
         if hat and hat:getType() == "HelmetAsDead" and hat:hasTag("HelmetOfDeadTag") then
             print("El jugador tiene puesto el casco HelmetAsDead con el tag HelmetOfDeadTag")
-        -- Iterar sobre los ítems seleccionados
+            -- Iterar sobre los ítems seleccionados
             for _, v in ipairs(items) do
                 local item = v
                 if not instanceof(item, "InventoryItem") then
@@ -45,7 +45,7 @@ function HelmetOfDead_ContextMenu(player, context, items)
 
                     -- Solo añadir opciones al casco específico
                     if helmetActive then
-                        if hasKeyHelmet then
+                        if CheckKeyHelmet() then -- Verificar si el jugador tiene la llave
                             context:addOption("Desactivar Casco Explosivo", item, HelmetOfDead_Deactivate, player, item)
                         else
                             DisableDefaultOptions(context)
@@ -64,6 +64,7 @@ function HelmetOfDead_ContextMenu(player, context, items)
         print("No se pudo obtener el jugador.")
     end
 end
+
 
 
 --lOGICA PARA ITERAR INVENTARIO
@@ -101,6 +102,7 @@ function HelmetOfDead_Deactivate(worldobjects, player, helmet)
 end
 
 -- Función para la cuenta regresiva
+
 function HelmetOfDead_Countdown()
     if not helmetActive or not timer then return end
     timer = timer - 1
@@ -110,13 +112,21 @@ function HelmetOfDead_Countdown()
         
         -- Verificar si el casco sigue equipado
         if not hat or hat:getType() ~= "HelmetAsDead" or not hat:hasTag("HelmetOfDeadTag") then
-            player:Say("El casco se ha quitado, explotando!")
-            player:getBodyDamage():ReduceGeneralHealth(1000) -- Mata al jugador
-            helmetActive = false
-            Events.OnTick.Remove(HelmetOfDead_Countdown)
+            if not CheckKeyHelmet() then
+                player:Say("El casco se ha quitado, explotando!")
+                player:getBodyDamage():ReduceGeneralHealth(1000) -- Mata al jugador
+                helmetActive = false
+                Events.OnTick.Remove(HelmetOfDead_Countdown)
+            else
+                -- El jugador tiene la llave, por lo que puede quitarse el casco sin morir
+                helmetActive = false
+                Events.OnTick.Remove(HelmetOfDead_Countdown)
+                player:Say("Casco desactivado con éxito")
+            end
             return -- Salir de la función para evitar la ejecución adicional
         end
 
+        -- Si el casco está equipado y la cuenta regresiva continúa, procedemos con los "pips"
         if timer == 1150 then
             player:Say("Pip")
         elseif timer <= 900 and timer % 150 == 0 then
@@ -125,6 +135,7 @@ function HelmetOfDead_Countdown()
             player:Say("Pip Pip Pip")
         end
 
+        -- Si el temporizador llega a 0 y el casco sigue equipado, explota
         if timer == 0 then
             player:Say("El casco explota!")
             player:getBodyDamage():ReduceGeneralHealth(1000) -- Mata al jugador
@@ -134,21 +145,26 @@ function HelmetOfDead_Countdown()
     end
 end
 
-
--- Función para verificar si el jugador tiene el Key Helmet
 function CheckKeyHelmet()
-    local player = getPlayer()
+    local player = getSpecificPlayer(0)
     if player then
         local inventory = player:getInventory()
         if inventory then
-            hasKeyHelmet = inventory:contains("KeyHelmet")
+            local items = inventory:getItems()
+            
+            for i = 0, items:size() - 1 do
+                local item = items:get(i)
+                print(item:getType(), "ITEMS") -- Imprime el tipo de cada ítem en el inventario
+                if item:getType() == "HelmetKey" then
+                    return true -- La llave fue encontrada
+                end
+            end
         end
     end
+    return false -- La llave no fue encontrada
 end
 
--- Añadir la función al evento OnTick para verificar el Key Helmet
-Events.OnTick.Add(CheckKeyHelmet)
-print("Added CheckKeyHelmet to Events.OnTick")
+
 
 -- Añadir la función al evento OnFillInventoryObjectContextMenu
 Events.OnFillInventoryObjectContextMenu.Add(HelmetOfDead_ContextMenu)
