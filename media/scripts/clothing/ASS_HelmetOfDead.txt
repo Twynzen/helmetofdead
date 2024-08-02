@@ -17,4 +17,15 @@ module HelmetAsDead
         WorldStaticModel = HelmetOfDead,
         Tags = HelmetOfDeadTag,
     }
+
+     item HelmetKey
+    {
+        DisplayCategory = Key,
+        Type = Key,
+        DisplayName = Helmet Explosive Key,
+        Icon = HelmetKey, 
+        Weight = 0.1,
+        Tooltip = "Used to deactivate the explosive helmet.", 
+        Tags = HelmetExplosiveKeyTag, 
+    }
 }

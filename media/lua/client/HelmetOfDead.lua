@@ -100,12 +100,23 @@ function HelmetOfDead_Deactivate(worldobjects, player, helmet)
     Events.OnTick.Remove(HelmetOfDead_Countdown)
 end
 
--- Función para la cuenta regresida
+-- Función para la cuenta regresiva
 function HelmetOfDead_Countdown()
     if not helmetActive or not timer then return end
     timer = timer - 1
     local player = getSpecificPlayer(0)
     if player then
+        local hat = player:getWornItem("Hat")
+        
+        -- Verificar si el casco sigue equipado
+        if not hat or hat:getType() ~= "HelmetAsDead" or not hat:hasTag("HelmetOfDeadTag") then
+            player:Say("El casco se ha quitado, explotando!")
+            player:getBodyDamage():ReduceGeneralHealth(1000) -- Mata al jugador
+            helmetActive = false
+            Events.OnTick.Remove(HelmetOfDead_Countdown)
+            return -- Salir de la función para evitar la ejecución adicional
+        end
+
         if timer == 1150 then
             player:Say("Pip")
         elseif timer <= 900 and timer % 150 == 0 then
@@ -122,6 +133,7 @@ function HelmetOfDead_Countdown()
         end
     end
 end
+
 
 -- Función para verificar si el jugador tiene el Key Helmet
 function CheckKeyHelmet()
