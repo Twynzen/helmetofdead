@@ -86,9 +86,10 @@ end
 -- Función para activar el casco
 function HelmetOfDead_Activate(worldobjects, player, helmet)
     helmetActive = true
-    timer = 1200 -- 2 minutos en ticks (60 ticks por segundo * 120 segundos)
+    timer = 4800 -- 2 minutos en ticks (60 ticks por segundo * 120 segundos)
     print("HelmetOfDead activado")
     player:Say("Casco activado")
+    PlayHelmetSound("helmet_beep")
     Events.OnTick.Add(HelmetOfDead_Countdown)
 end
 
@@ -113,12 +114,12 @@ function HelmetOfDead_Countdown()
         -- Verificar si el casco sigue equipado
         if not hat or hat:getType() ~= "HelmetAsDead" or not hat:hasTag("HelmetOfDeadTag") then
             if not CheckKeyHelmet() then
+                PlayHelmetSound("helmet_explode")
                 player:Say("El casco se ha quitado, explotando!")
                 player:getBodyDamage():ReduceGeneralHealth(1000) -- Mata al jugador
                 helmetActive = false
                 Events.OnTick.Remove(HelmetOfDead_Countdown)
             else
-                -- El jugador tiene la llave, por lo que puede quitarse el casco sin morir
                 helmetActive = false
                 Events.OnTick.Remove(HelmetOfDead_Countdown)
                 player:Say("Casco desactivado con éxito")
@@ -126,17 +127,47 @@ function HelmetOfDead_Countdown()
             return -- Salir de la función para evitar la ejecución adicional
         end
 
-        -- Si el casco está equipado y la cuenta regresiva continúa, procedemos con los "pips"
-        if timer == 1150 then
-            player:Say("Pip")
-        elseif timer <= 900 and timer % 150 == 0 then
-            player:Say("Pip Pip")
-        elseif timer <= 600 and timer % 50 == 0 then
-            player:Say("Pip Pip Pip")
+         -- Configuración de los sonidos "pip" en crescendo
+         -- Dividiendo el tiempo en 10 fases para un crescendo más largo
+                -- Lógica anidada para aumentar la frecuencia de los pips
+                  -- Fase 1: Pip cada 2 segundos (120 ticks)
+        if timer > 3600 then
+            if timer % 120 == 0 then
+                print(timer, "PIP1 - Cada 2 segundos")
+                PlayHelmetSound("helmet_beep")
+            end
+        
+        -- Fase 2: Pip cada 1 segundo (60 ticks)
+        elseif timer > 2400 then
+            if timer % 60 == 0 then
+                print(timer, "PIP2 - Cada 1 segundo")
+                PlayHelmetSound("helmet_beep")
+            end
+        
+        -- Fase 3: Pip cada 500 milisegundos (30 ticks)
+        elseif timer > 1200 then
+            if timer % 30 == 0 then
+                print(timer, "PIP3 - Cada 500 milisegundos")
+                PlayHelmetSound("helmet_beep")
+            end
+        
+        -- Fase 4: Pip cada 250 milisegundos (15 ticks)
+        elseif timer > 600 then
+            if timer % 15 == 0 then
+                print(timer, "PIP4 - Cada 250 milisegundos")
+                PlayHelmetSound("helmet_beep")
+            end
+        
+        -- Fase 5: Pip cada 100 milisegundos (6 ticks)
+        elseif timer > 0 then
+            if timer % 6 == 0 then
+                print(timer, "PIP5 - Cada 100 milisegundos")
+                PlayHelmetSound("helmet_beep")
+            end
         end
-
         -- Si el temporizador llega a 0 y el casco sigue equipado, explota
         if timer == 0 then
+            PlayHelmetSound("helmet_explode")
             player:Say("El casco explota!")
             player:getBodyDamage():ReduceGeneralHealth(1000) -- Mata al jugador
             helmetActive = false
@@ -144,6 +175,7 @@ function HelmetOfDead_Countdown()
         end
     end
 end
+
 
 function CheckKeyHelmet()
     local player = getSpecificPlayer(0)
@@ -163,6 +195,16 @@ function CheckKeyHelmet()
     end
     return false -- La llave no fue encontrada
 end
+
+-- Función para reproducir sonidos específicos
+function PlayHelmetSound(soundName)
+    if soundName then
+        getPlayer():playSound(soundName)
+    else
+        print("No se especificó un nombre de sonido válido.")
+    end
+end
+
 
 
 

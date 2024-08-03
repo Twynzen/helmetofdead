@@ -28,4 +28,7 @@ module HelmetAsDead
         Tooltip = "Used to deactivate the explosive helmet.", 
         Tags = HelmetExplosiveKeyTag, 
     }
+
+
+
 }

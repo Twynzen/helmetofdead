@@ -1,0 +1,13 @@
+    sound helmet_beep {
+        category = UI,
+        file = "media/sound/helmet_beep.wav",
+        volume = 0.4,
+        pitch = 1.0,
+    }
+
+    sound helmet_explode {
+        category = UI,
+        file = "media/sound/helmet_explode.wav",
+        volume = 1.0,
+        pitch = 1.0,
+    }
