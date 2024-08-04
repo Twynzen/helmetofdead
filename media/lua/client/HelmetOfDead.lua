@@ -30,6 +30,7 @@ function HelmetOfDead_ContextMenu(player, context, items)
         local hat = player:getWornItem("Hat")
         if hat and hat:getType() == "HelmetAsDead" and hat:hasTag("HelmetOfDeadTag") then
             print("El jugador tiene puesto el casco HelmetAsDead con el tag HelmetOfDeadTag")
+            IncreaseStressAndUnhappinessToMax(player)
             -- Iterar sobre los ítems seleccionados
             for _, v in ipairs(items) do
                 local item = v
@@ -205,6 +206,15 @@ function PlayHelmetSound(soundName)
     end
 end
 
+function IncreaseStressAndUnhappinessToMax(player)
+    -- Aumentar la ansiedad al máximo
+    player:getStats():setStress(1.0)
+    
+    -- Aumentar la tristeza al máximo
+    player:getBodyDamage():setUnhappynessLevel(100)
+    
+    print("La ansiedad y la tristeza se han ajustado al máximo")
+end
 
 
 
