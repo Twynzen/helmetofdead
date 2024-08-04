@@ -1,22 +1,26 @@
-module HelmetAsDead
+module Base
 {
-    recipe Craft Helmet of Dead
+    recipe Helmet of Dead
     {
-        MetalPipe,
-        BucketEmpty,
+        BlowTorch=1,
+        MetalPipe=3,
+        SmallSheetMetal=2, 
         ElectronicsScrap,
         Result:HelmetAsDead,
-        Time:30.0,
-        Category:Survivalist,
+        Time:500.0,
+        Category:Electronics,  
+        TimerCrafted,
+        SkillRequired: Electricity=7
     }
 
-    recipe Dismantle Helmet of Dead
+    recipe Helmet Explosive Key
     {
-        HelmetOfDead,
-        Result:MetalPipe,
-        Result:BucketEmpty,
-        Result:ElectronicsScrap,
-        Time:15.0,
-        Category:Survivalist,
+        SmallSheetMetal=2, 
+        
+        ElectronicsScrap,
+        Result:HelmetKey,
+        Time:200.0,
+        Category:Electronics, 
+        SkillRequired: Electricity=7
     }
 }

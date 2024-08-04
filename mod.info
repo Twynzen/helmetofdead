@@ -12,3 +12,4 @@ authors=twynzen/carlesturo
 
 script=media/scripts/clothing/ASS_HelmetOfDead.txt
 script=media/scripts/sounds/ASS_HelmetOfDead_Sounds.txt
+script=media/scripts/HelmetOfDead_recipes.txt
