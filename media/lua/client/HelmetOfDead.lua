@@ -5,6 +5,7 @@ local helmetActive = false
 local hasKeyHelmet = false
 local helmetItem = "HelmetAsDead"
 local keyItem = "HelmetExplosiveKey"
+local detaultTime = 4800
 
 function DisableDefaultOptions(context)
     local optionsToRemove = {"Dejar de usar", "Soltar"}
@@ -97,7 +98,7 @@ end
 -- Función para desactivar el casco
 function HelmetOfDead_Deactivate(worldobjects, player, helmet)
     helmetActive = false
-    timer = nil
+    timer = 10000 
     print("HelmetOfDead desactivado")
     player:Say("Casco desactivado")
     Events.OnTick.Remove(HelmetOfDead_Countdown)
@@ -129,9 +130,7 @@ function HelmetOfDead_Countdown()
         end
 
          -- Configuración de los sonidos "pip" en crescendo
-         -- Dividiendo el tiempo en 10 fases para un crescendo más largo
-                -- Lógica anidada para aumentar la frecuencia de los pips
-                  -- Fase 1: Pip cada 2 segundos (120 ticks)
+
         if timer > 3600 then
             if timer % 120 == 0 then
                 print(timer, "PIP1 - Cada 2 segundos")
