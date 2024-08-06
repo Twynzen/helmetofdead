@@ -5,7 +5,7 @@ local helmetActive = false
 local hasKeyHelmet = false
 local helmetItem = "HelmetAsDead"
 local keyItem = "HelmetExplosiveKey"
-local detaultTime = 4800
+local defaultTime = 9600
 
 function DisableDefaultOptions(context)
     local optionsToRemove = {"Dejar de usar", "Soltar"}
@@ -88,7 +88,7 @@ end
 -- Función para activar el casco
 function HelmetOfDead_Activate(worldobjects, player, helmet)
     helmetActive = true
-    timer = 4800 -- 2 minutos en ticks (60 ticks por segundo * 120 segundos)
+    timer = defaultTime -- 2 minutos en ticks (60 ticks por segundo * 120 segundos)
     print("HelmetOfDead activado")
     player:Say("Casco activado")
     PlayHelmetSound("helmet_beep")
@@ -98,10 +98,19 @@ end
 -- Función para desactivar el casco
 function HelmetOfDead_Deactivate(worldobjects, player, helmet)
     helmetActive = false
-    timer = 10000 
+    timer = defaultTime 
     print("HelmetOfDead desactivado")
     player:Say("Casco desactivado")
     Events.OnTick.Remove(HelmetOfDead_Countdown)
+end
+
+function CalculateTimePhases(baseTime)
+    local phase1 = baseTime * 0.75  -- 75% del tiempo total
+    local phase2 = baseTime * 0.50  -- 50% del tiempo total
+    local phase3 = baseTime * 0.25  -- 25% del tiempo total
+    local phase4 = baseTime * 0.125 -- 12.5% del tiempo total
+    
+    return phase1, phase2, phase3, phase4
 end
 
 -- Función para la cuenta regresiva
@@ -110,6 +119,10 @@ function HelmetOfDead_Countdown()
     if not helmetActive or not timer then return end
     timer = timer - 1
     local player = getSpecificPlayer(0)
+    
+    -- Calcular las fases en función del tiempo predeterminado
+    local phase1, phase2, phase3, phase4 = CalculateTimePhases(defaultTime)
+
     if player then
         local hat = player:getWornItem("Hat")
         
@@ -129,30 +142,29 @@ function HelmetOfDead_Countdown()
             return -- Salir de la función para evitar la ejecución adicional
         end
 
-         -- Configuración de los sonidos "pip" en crescendo
-
-        if timer > 3600 then
+        -- Configuración de los sonidos "pip" en crescendo usando los valores dinámicos
+        if timer > phase1 then
             if timer % 120 == 0 then
                 print(timer, "PIP1 - Cada 2 segundos")
                 PlayHelmetSound("helmet_beep")
             end
         
         -- Fase 2: Pip cada 1 segundo (60 ticks)
-        elseif timer > 2400 then
+        elseif timer > phase2 then
             if timer % 60 == 0 then
                 print(timer, "PIP2 - Cada 1 segundo")
                 PlayHelmetSound("helmet_beep")
             end
         
         -- Fase 3: Pip cada 500 milisegundos (30 ticks)
-        elseif timer > 1200 then
+        elseif timer > phase3 then
             if timer % 30 == 0 then
                 print(timer, "PIP3 - Cada 500 milisegundos")
                 PlayHelmetSound("helmet_beep")
             end
         
         -- Fase 4: Pip cada 250 milisegundos (15 ticks)
-        elseif timer > 600 then
+        elseif timer > phase4 then
             if timer % 15 == 0 then
                 print(timer, "PIP4 - Cada 250 milisegundos")
                 PlayHelmetSound("helmet_beep")
@@ -165,6 +177,7 @@ function HelmetOfDead_Countdown()
                 PlayHelmetSound("helmet_beep")
             end
         end
+        
         -- Si el temporizador llega a 0 y el casco sigue equipado, explota
         if timer == 0 then
             PlayHelmetSound("helmet_explode")
@@ -175,6 +188,7 @@ function HelmetOfDead_Countdown()
         end
     end
 end
+
 
 
 function CheckKeyHelmet()

@@ -1,7 +1,7 @@
     sound helmet_beep {
         category = UI,
         file = "media/sound/helmet_beep.wav",
-        volume = 0.4,
+        volume = 0.2,
         pitch = 1.0,
     }
 
