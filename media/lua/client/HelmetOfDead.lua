@@ -7,6 +7,14 @@ local helmetItem = "HelmetAsDead"
 local keyItem = "HelmetExplosiveKey"
 local defaultTime = 9600
 
+local timeOptions = {
+    {label = "2 min 40s", time = 9600},
+    {label = "10 min ", time = 36000},
+    {label = "20 min ", time = 72000},
+    {label = "30 min ", time = 108000},
+    {label = "40 min ", time = 144000}
+}
+
 function DisableDefaultOptions(context)
     local optionsToRemove = {"Dejar de usar", "Soltar"}
     for i = #context.options, 1, -1 do
@@ -45,6 +53,19 @@ function HelmetOfDead_ContextMenu(player, context, items)
                 if instanceof(item, "InventoryItem") and item:getType() == "HelmetAsDead" and item:hasTag("HelmetOfDeadTag") then
                     print("El ítem es HelmetAsDead y tiene el tag HelmetOfDeadTag")
 
+                      -- Solo permitir cambiar la duración si el casco no está activado
+                      if not helmetActive then
+                        -- Crear submenú para seleccionar el tiempo
+                        local timeSubMenu = context:getNew(context)
+                        context:addSubMenu(context:addOption("Select timer"), timeSubMenu)
+    
+                        for _, option in ipairs(timeOptions) do
+                            timeSubMenu:addOption(option.label, item, function() defaultTime = option.time end)
+                        end
+                    else
+                        print("El casco ya está activado, no se puede cambiar la duración.")
+                    end
+
                     -- Solo añadir opciones al casco específico
                     if helmetActive then
                         if CheckKeyHelmet() then -- Verificar si el jugador tiene la llave
@@ -68,28 +89,11 @@ function HelmetOfDead_ContextMenu(player, context, items)
 end
 
 
-
---lOGICA PARA ITERAR INVENTARIO
--- local inventory = player:getInventory()
---         for i = 0, inventory:getItems():size() - 1 do
---             local item = inventory:getItems():get(i)
---             print("Revisando item en inventario:", item:getType())
---             if instanceof(item, "InventoryItem") then
---                 print("El item ", item,"es una instancia de InventoryItem")
-            
---             else
---                 print("El item no es una instancia de InventoryItem")
---             end
---         end
-
-
-
-
 -- Función para activar el casco
 function HelmetOfDead_Activate(worldobjects, player, helmet)
     helmetActive = true
     timer = defaultTime -- 2 minutos en ticks (60 ticks por segundo * 120 segundos)
-    print("HelmetOfDead activado")
+    print("HelmetOfDead activado con " .. timer .. " ticks")
     player:Say("Casco activado")
     PlayHelmetSound("helmet_beep")
     Events.OnTick.Add(HelmetOfDead_Countdown)
