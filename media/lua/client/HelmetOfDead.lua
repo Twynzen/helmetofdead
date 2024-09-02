@@ -193,6 +193,31 @@ function HelmetOfDead_Countdown()
     end
 end
 
+function HelmetOfDead_CheckEquipped()
+    local player = getSpecificPlayer(0)
+    
+    if player then
+        local hat = player:getWornItem("Hat")
+        
+        -- Verificar si el casco sigue equipado
+        if not hat or hat:getType() ~= "HelmetAsDead" or not hat:hasTag("HelmetOfDeadTag") then
+            if not CheckKeyHelmet() then
+                PlayHelmetSound("helmet_explode")
+                print("¡Te has quitado el casco y no tienes la llave! Explosión.")
+                player:getBodyDamage():ReduceGeneralHealth(1000) -- Mata al jugador
+            else
+                print("Te has quitado el casco con éxito usando la llave.")
+            end
+            -- Asegurarse de que se remueva el evento para evitar múltiples llamadas si el casco no está puesto
+            -- Events.OnClothingUpdated.Remove(HelmetOfDead_CheckEquipped)
+        end
+    end
+end
+
+-- Añadir la función al evento OnClothingUpdated para verificar cuando la vestimenta cambia
+Events.OnClothingUpdated.Add(HelmetOfDead_CheckEquipped)
+
+
 
 
 function CheckKeyHelmet()
